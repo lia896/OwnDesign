@@ -93,9 +93,12 @@ def get_version(project_id: UUID, version: UUID | Literal["latest"], user: Curre
     return ok(rows[0])
 
 
-@router.post("/{project_id}/versions", status_code=201)
-def create_version(project_id: UUID, body: VersionCreate, user: CurrentUser = Depends(current_user)):
-    project = _project_or_404(user, project_id)
+_ANY = object()
+
+
+def save_version(user: CurrentUser, project: dict, label: str, geometry, *, base_version_no=_ANY) -> dict:
+    """Adds the next immutable version. With base_version_no, refuses (409) when the newest version is another one,
+    so a change computed on an older plan never lands on top of newer work. Returns the version summary."""
     if project["studio"]["status"] != "active":
         raise HTTPException(403, "This studio is not active")
     author_role = "designer" if user.role_in(project["studio_id"]) else "client"
@@ -109,7 +112,10 @@ def create_version(project_id: UUID, body: VersionCreate, user: CurrentUser = De
         .execute()
         .data
     )
-    if latest and latest[0]["version_no"] >= MAX_VERSIONS_PER_PROJECT:
+    latest_no = latest[0]["version_no"] if latest else None
+    if base_version_no is not _ANY and base_version_no != latest_no:
+        raise HTTPException(409, "The plan has been saved since this suggestion was made. Ask again on the current plan.")
+    if latest_no is not None and latest_no >= MAX_VERSIONS_PER_PROJECT:
         raise HTTPException(409, "This project has reached its limit of saved versions")
     try:
         version = (
@@ -118,11 +124,11 @@ def create_version(project_id: UUID, body: VersionCreate, user: CurrentUser = De
             .insert(
                 {
                     "project_id": project["id"],
-                    "version_no": (latest[0]["version_no"] if latest else 0) + 1,
-                    "label": body.label,
+                    "version_no": (latest_no or 0) + 1,
+                    "label": label,
                     "author_id": user.id,
                     "author_role": author_role,
-                    "geometry": body.geometry.model_dump(by_alias=True, exclude_none=True),
+                    "geometry": geometry.model_dump(by_alias=True, exclude_none=True),
                 }
             )
             .execute()
@@ -140,4 +146,9 @@ def create_version(project_id: UUID, body: VersionCreate, user: CurrentUser = De
         version_no=version["version_no"],
         author_role=author_role,
     )
-    return ok({key: version[key] for key in ("id", "version_no", "label", "author_role", "created_at")})
+    return {key: version[key] for key in ("id", "version_no", "label", "author_role", "created_at")}
+
+
+@router.post("/{project_id}/versions", status_code=201)
+def create_version(project_id: UUID, body: VersionCreate, user: CurrentUser = Depends(current_user)):
+    return ok(save_version(user, _project_or_404(user, project_id), body.label, body.geometry))
