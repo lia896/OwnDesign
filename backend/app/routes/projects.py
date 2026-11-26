@@ -3,11 +3,13 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 from postgrest.exceptions import APIError
+from pydantic import ValidationError
 
 from app.auth import CurrentUser, current_user
 from app.db import audit, service
+from app.diff import compare
 from app.responses import ok
-from app.schemas import ProjectCreate, VersionCreate
+from app.schemas import CompareBody, Geometry, ProjectCreate, VersionCreate
 
 router = APIRouter(prefix="/v1/projects")
 
@@ -91,6 +93,26 @@ def get_version(project_id: UUID, version: UUID | Literal["latest"], user: Curre
     if not rows:
         raise HTTPException(404, "Plan version not found")
     return ok(rows[0])
+
+
+@router.post("/{project_id}/versions/compare")
+def compare_versions(project_id: UUID, body: CompareBody, user: CurrentUser = Depends(current_user)):
+    """Read-only diff of two saved versions of one project. Both are read through RLS, so a version of a project
+    the caller cannot see is simply not found. Nothing is written."""
+    _project_or_404(user, project_id)
+    a, b = str(body.version_a_id), str(body.version_b_id)
+    if a == b:
+        raise HTTPException(422, "Choose two different versions to compare")
+    rows = user.db.table("plan_versions").select(f"{VERSION_SUMMARY}, geometry").eq("project_id", str(project_id)).in_("id", [a, b]).execute().data
+    by_id = {row["id"]: row for row in rows}
+    if a not in by_id or b not in by_id:
+        raise HTTPException(404, "Plan version not found")
+    try:
+        geometry_a, geometry_b = (Geometry.model_validate(by_id[v]["geometry"]) for v in (a, b))
+    except ValidationError:
+        raise HTTPException(422, "These versions cannot be compared") from None
+    summary = lambda row: {key: row[key] for key in VERSION_SUMMARY.split(", ")}  # noqa: E731
+    return ok({"version_a": summary(by_id[a]), "version_b": summary(by_id[b]), **compare(geometry_a, geometry_b)})
 
 
 @router.post("/{project_id}/versions", status_code=201)

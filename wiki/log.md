@@ -101,3 +101,122 @@ Several findings fixed (suspended studios, upload race, consultant cap and conte
 ## [2026-11-23] test | Phase 2 verified
 Backend 94 passed, frontend 31 passed. Pages: [testing](testing.md).
 
+## [2026-11-26] plan | Tests in GitHub Actions
+Plan approved by the user: everything runs in CI, a separate Supabase key for CI, report only.
+Pages: [decisions](decisions.md).
+
+## [2026-11-26] security | Review of the CI plan and workflow
+Security-reviewer agent on the plan (2 high: branch-limited environment, separate key; both adopted), then
+security-reviewer and code-reviewer agents on the file (no critical, high or medium security finding; four small
+fixes applied), then `security-review` on the commits: no finding. Pages: [security](security.md),
+[open-items](open-items.md).
+
+## [2026-11-26] infra | CI workflow and the `ci` environment
+`.github/workflows/ci.yml` with jobs `frontend`, `backend`, `backend-unit`; GitHub environment `ci` limited to
+`dev` and `main`, holding the Supabase URL and publishable key. Found on the way: `test_consultant.py` imported
+`app.main` at module level, so the suite crashed instead of skipping without settings; fixed. Commits `0150113`,
+`dff701b`. Pages: [testing](testing.md), [security](security.md), [decisions](decisions.md).
+
+## [2026-11-26] test | CI verified, except the full backend run
+Local: backend 100 passed, frontend 31 passed. Clean clone without settings: 22 passed, 78 skipped. On GitHub:
+red check on a pull request with a failing test, refusal of a branch outside the environment's rule, failure on a
+missing secret, all as intended. The temporary pull request #25 was closed and its branch deleted. Open: a
+green `backend` run, waiting for the CI secret key. Pages: [testing](testing.md), [open-items](open-items.md).
+
+## [2026-11-26] docs | Plan export specification added
+The plan export feature specification (PNG, PDF and DXF downloads of a saved plan version, with a
+conceptual-plan notice and a studio activity event) added as a raw source at `specs/plan-export.md`.
+Technical validation (section 10 of the spec) comes before implementation. Pages: [index](index.md).
+
+## [2026-11-26] docs | Pull request #9 merged: plan export specification
+A document only (`specs/plan-export.md`, 145 lines), read in full: no code, no secrets. Its "confirmed product
+decisions" are the contributor's; the index line now says so. Conflict in this log resolved by keeping both
+sides. Frontend 31 passed; the backend suite was not run for a document. Commits `3a7a741`, `b63440f`.
+Pages: [index](index.md).
+
+## [2026-11-26] build | Studio branding preview
+`branding.html`: logo upload (PNG, JPG, WebP, 2 MB), four colour presets, custom primary, background and
+text colours with a contrast check, live preview. Browser only, nothing saved. Frontend 39 passed; manual
+check in Chrome. Backend integration and browser journeys not run (Supabase not configured).
+Pages: [overview](overview.md), [design](design.md), [open-items](open-items.md).
+
+## [2026-11-26] build | Pull request #8 merged: studio branding preview
+Browser-only preview page (`frontend/branding.html`); nothing saved or sent. Static read, then code-reviewer and
+security-reviewer agents: no critical or high finding; nine files, no network, storage or dynamic code; CSP as on
+the other pages. One medium note on the contrast check and smaller ones are in [open-items](open-items.md); the
+contributor's code was not changed. On the merged tree: backend 100 passed, frontend 39 passed. No browser journey
+for the page yet. Commits `2552d1d` (merge) and the two that follow it. Pages: [open-items](open-items.md).
+
+The six entries that follow came with pull request #14 and describe work in the contributor's fork. "The user"
+in them was the contributor's own user, and the Supabase project and test run were theirs, not this project's.
+
+## [2026-11-26] decision | 3D walkthrough chosen (in the contributor's fork)
+The contributor chose a first-person walkthrough, against PRD 3.3. Pages: [decisions](decisions.md),
+[open-items](open-items.md).
+
+## [2026-11-26] build | 3D walkthrough in the plan editor
+Tests first for the geometry. Commits `5b50e33`, `3a688e3`, `ed51665`. Pages: [overview](overview.md),
+[architecture](architecture.md).
+
+## [2026-11-26] security | Review of the walkthrough, and a code review
+No security finding. Code review: sharp-angle walls could be crossed, oversized plans froze the tab, Ctrl+S
+did not save in 3D. Fixed in `ff3c9bf`, which also fixes the new browser journey (the page's policy blocks
+`wait_for_function`). Pages: [security](security.md).
+
+## [2026-11-26] infra | The contributor's own Supabase project
+Created by the contributor for their fork, migrations and auth settings applied. Not this project's database.
+
+## [2026-11-26] test | Walkthrough verified (in the contributor's fork)
+Backend 100 passed, frontend 49 passed, as reported by the contributor. Pages: [testing](testing.md).
+
+## [2026-11-26] docs | Walkthrough sent as a pull request
+No write access to the repository, so the work goes from a fork to `dev` as a pull request. The local
+commits were re-authored before publishing, and the hashes above updated. Pages: [log](log.md).
+
+## [2026-11-26] build | Pull request #14 merged: 3D walkthrough in the plan editor
+First-person, view-only walkthrough opened from the editor; three.js 0.180.0 vendored. Before any of it ran: the
+vendored files compared by SHA-256 with the npm package (identical), the test and editor changes read, then
+code-reviewer and security-reviewer agents: no critical or high finding. One medium and four low notes are in
+[open-items](open-items.md); the contributor's code was not changed. Six wiki conflicts resolved by keeping both
+sides; the contributor's wiki text spoke of "the user", which was re-attributed
+([decisions](decisions.md), "From merged pull requests"). On the merged tree: backend 100 passed, frontend 57
+passed. Commits `5bb03bf` (merge), `5c86f5b`. Pages: [decisions](decisions.md), [security](security.md),
+[testing](testing.md), [open-items](open-items.md).
+
+## [2026-11-26] test | Pull request #19 reviewed, not merged: version comparison
+Code-reviewer and security-reviewer agents, then its tests on a trial merge onto `dev`: frontend 63 passed, its
+unit and API tests passed, one of its four browser journeys failed (it asserts on text that the stylesheet
+uppercases, and a later step cannot pass). Also confirmed in the code: the details panel renders the text "null",
+and the comparison and the 3D walkthrough can be open at once. No security finding in the code; the endpoint
+reads through RLS. Its wiki recorded "the app is for customers, not internal designers" as the user's decision;
+not adopted. A comment on the pull request lists what blocks it; its base was changed from `main` to `dev`.
+Nothing of it is on `dev`.
+
+## [2026-11-26] plan | Version comparison scope (proposal)
+Proposed with pull request #19: comparison open to everyone with access to the project, stages 1 and 2 of its
+spec. Recorded as proposals in [decisions](decisions.md).
+
+## [2026-11-26] build | Version comparison
+Diff engine, read-only endpoint, comparison view in the editor, on branch `feature/version-comparison`.
+Commits `deaa797`, `4248058`, `a0185df`, `03411b4`. Pages: [architecture](architecture.md),
+[decisions](decisions.md), [open-items](open-items.md).
+
+## [2026-11-26] test | Version comparison
+Backend 39 passed, 79 skipped (no Supabase keys), frontend 37 passed. API and browser tests written, not run.
+Pages: [testing](testing.md).
+
+## [2026-11-26] security | Review of version comparison
+No high-confidence findings. Pages: [security](security.md).
+
+## [2026-11-26] test | Version comparison on a real database
+Merged `dev` into the branch. Full run against the new development project: backend 133 passed, frontend 37
+passed. Fixed: version A now hides at once in the difference view; three assertions in
+`test_e2e_compare.py`. Pages: [testing](testing.md), [open-items](open-items.md).
+
+## [2026-11-26] build | Review of pull request #19 addressed
+Merged the latest `dev`. Fixed: the details panel no longer shows "null"; the comparison and the 3D walkthrough
+cannot be open together (each button is disabled while the other view is open, and opening the comparison
+closes a walk); a same-version pick cancels an answer still on its way; `groups` lists change ids instead of
+repeating the changes. Tests: another studio's designer is refused; browser checks use `expect`. Backend 134
+passed, frontend 64 passed. Pages: [decisions](decisions.md), [architecture](architecture.md).
+

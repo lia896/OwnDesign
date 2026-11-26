@@ -8,6 +8,7 @@ Remove an item when it is resolved and note the resolution in [log.md](log.md).
 - **Invites** never expire and are not bound to the invited email address.
 - **Product name.** "ATELIER" comes from Stitch; the PRD says undecided.
 - **PRD text** still says "no paid API", which the OpenAI decision overrides.
+- **PRD 3.3** still excludes interactive 3D navigation, which the walkthrough decision overrides.
 
 ## Phase 2 gaps
 
@@ -18,6 +19,36 @@ Remove an item when it is resolved and note the resolution in [log.md](log.md).
 - **Delete-then-insert saves** of finishes and the moodboard are not atomic.
 - **Studio dashboard** does not link project cards to the brief, finishes or moodboard; designers reach them through the editor.
 - The editor has no link to the Phase 2 pages at 767 px and below.
+
+## Studio branding
+
+`branding.html` is a browser-only preview. Still needed: storage and a table for the logo and colours,
+owner-only write endpoints with server-side image and colour validation, a tenant-isolation test, applying
+the theme on the pages that show the studio, a link from the dashboard, and browser journeys.
+
+From the review of pull request #8, not fixed: the contrast check accepts colours whose derived tokens fail
+4.5:1 (text `#747474` on white passes, but the muted text it produces is 3.19:1), which matters once the check
+decides what may be saved; the preview holds a second `h1` and a button and link that do nothing; the status
+line is rewritten on every colour-picker move; a chosen logo has no pixel-size limit.
+
+## 3D walkthrough gaps
+
+- No collision with furniture, no ceiling, no catalog materials or colours.
+- Each box is its own draw call; the largest plans the server accepts may be slow, especially on phones.
+  Instancing would fix it. Frame rate on real phones is unmeasured.
+- A lost WebGL context is not handled: leave the view and open it again.
+- Possibly stuck walking on macOS if a key is released while Cmd is held (unverified).
+- From the review of pull request #14, not fixed: holding W or D while leaving the 3D view can pick the wall or
+  door tool (key repeat reaches the editor's shortcuts); the oversized-plan guard counts wall cuts, not boxes,
+  so the largest legal plan is slow; a failure after the WebGL renderer is created leaks its context and is
+  reported as "no WebGL"; if closing the view throws, the editor behind it stays inert; a furniture type named
+  `constructor` gives a broken box (`Object.hasOwn` fixes it).
+
+## Version comparison gaps
+
+- **Overlay mode** (two versions on one canvas with opacity) and an **AI summary** of changes are not built.
+- **Room grouping** uses the box of a room's walls, so an L-shaped room claims its whole bounding box.
+- A room whose walls lie on one line has no area, so its furniture is grouped under "Outside any room".
 
 ## Later phases with a Stitch screen waiting
 
@@ -31,6 +62,14 @@ Studio branding, project dossier and export, 3D renderings: designs are in
 - `connect-src` in the content security policy, per environment.
 - Railway deployment files and environments.
 - Sign-out does not invalidate an already issued token before it expires.
+
+## CI
+
+- **The CI secret key is not set yet**, so `backend` fails in its first step. The user creates a secret key named `ci` in Supabase and stores it as `SUPABASE_SECRET_KEY` in the environment `ci`.
+- Make the check required on `main` after some stable runs.
+- A separate Supabase project for CI: today CI and local runs share the dev project and delete each other's test accounts.
+- Repository settings: allow-list the three actions and require pinning by hash.
+- Smaller review notes, not done: the guard step reads the secret values where a presence flag would do; a failed assertion can print a test account's email or part of a token; lint, type check and coverage are not in CI.
 
 ## Smaller
 

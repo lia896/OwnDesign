@@ -89,11 +89,12 @@ function summaryNode() {
   ];
 }
 
-function versionsNode(versions, onLoad) {
+function versionsNode(versions, onLoad, onCompare) {
   if (!versions) return null;
   return h("div", { class: "stack" },
     h("div", { class: "row between" }, h("span", { class: "label" }, "Plan versions"), h("span", { class: "code" }, `${versions.length} saved`)),
     versions.length === 0 && h("p", { class: "muted small" }, "Nothing saved yet."),
+    versions.length >= 2 && onCompare && h("button", { type: "button", onclick: () => onCompare() }, h("span", { class: "icon", "aria-hidden": "true" }, "compare"), "Compare versions"),
     versions.map((version) =>
       h("button", { type: "button", class: "version", title: "Load this version onto the canvas", onclick: () => onLoad(version) },
         h("span", { class: `chip ${version.author_role === "designer" ? "accent" : "ok"}` }, `v${version.version_no} · ${version.author_role}`),
@@ -104,7 +105,7 @@ function versionsNode(versions, onLoad) {
   );
 }
 
-export function renderInspector(root, editor, { versions, onLoadVersion }) {
+export function renderInspector(root, editor, { versions, onLoadVersion, onCompare }) {
   const { selection, plan } = editor;
   const item = selection ? plan[selection.kind].find((candidate) => candidate.id === selection.id) : null;
   const key = item ? `${selection.kind}:${selection.id}` : "none";
@@ -124,7 +125,7 @@ export function renderInspector(root, editor, { versions, onLoadVersion }) {
               spec.review(item) && h("p", { class: "note" }, REVIEW_NOTE),
             ]
           : summaryNode(),
-        versionsNode(versions, onLoadVersion),
+        versionsNode(versions, onLoadVersion, onCompare),
       ].flat().filter(Boolean),
     );
   }

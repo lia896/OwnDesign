@@ -4,7 +4,6 @@ from types import SimpleNamespace
 
 import pytest
 
-from app.main import app
 from app.routes.consultant import DAILY_MESSAGE_CAP, get_openai
 from tests.conftest import needs_supabase
 from tests.test_geometry import VALID
@@ -27,11 +26,13 @@ class FakeOpenAI:
 
 
 @pytest.fixture()
-def fake():
+def fake(api):
+    # api.app, not a module-level import of app.main: that import needs Supabase settings and
+    # would break collection where the suite is meant to skip (pull-request CI, a clean clone).
     client = FakeOpenAI()
-    app.dependency_overrides[get_openai] = lambda: client
+    api.app.dependency_overrides[get_openai] = lambda: client
     yield client
-    app.dependency_overrides.pop(get_openai, None)
+    api.app.dependency_overrides.pop(get_openai, None)
 
 
 @pytest.fixture(scope="module")
@@ -106,11 +107,11 @@ def test_openai_failure_stores_no_answer(api, world, fake):
 
 
 def test_unconfigured_assistant_is_503(api, world):
-    app.dependency_overrides[get_openai] = lambda: None
+    api.app.dependency_overrides[get_openai] = lambda: None
     try:
         assert api.post(url(world.theirs), json={"message": "hi"}, headers=world.other_client.headers).status_code == 503
     finally:
-        app.dependency_overrides.pop(get_openai, None)
+        api.app.dependency_overrides.pop(get_openai, None)
 
 
 def test_prompt_injection_text_is_plain_user_data(api, world, fake):

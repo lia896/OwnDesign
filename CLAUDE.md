@@ -99,8 +99,8 @@ details.
 
 ## Hard rules
 
-- Secrets live only in `backend/.env` and `frontend/js/config.js`, both git-ignored. Never commit,
-  print or paste them.
+- Secrets live only in `backend/.env` and `frontend/js/config.js`, both git-ignored, and in the GitHub
+  environment `ci` for the tests in GitHub Actions (`wiki/security.md`). Never commit, print or paste them.
 - All writes go through the backend with the service key after validation; signed-in users have
   SELECT only. Every new table gets RLS and a tenant-isolation test (`wiki/architecture.md`).
 - Work on `dev`. `main` moves only when the user asks.

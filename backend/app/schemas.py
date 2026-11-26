@@ -108,6 +108,11 @@ class ProjectCreate(Strict):
     property_type: Literal["existing", "new_build"]
 
 
+class CompareBody(Strict):
+    version_a_id: UUID  # baseline
+    version_b_id: UUID  # compared against the baseline
+
+
 class VersionCreate(Strict):
     label: Annotated[str, StringConstraints(strip_whitespace=True, max_length=80)] = ""
     geometry: Geometry

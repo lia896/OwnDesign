@@ -24,7 +24,7 @@ there lists the Stitch screen ids. Pulled 2026-11-19.
 | 2D Floor Plan Canvas & Space Planner | `frontend/editor.html` | Built |
 | Client Invitation & Guest Onboarding Portal | `frontend/entry.html` | Built |
 | Studio Overview & Project Directory | `frontend/studio.html` | Built |
-| Studio White-Label Branding & Atelier Settings | none | Reference for the branding phase |
+| Studio White-Label Branding & Atelier Settings | `frontend/branding.html` | Preview only: logo, colour presets and custom colours; nothing is saved |
 | Client & Designer Project Dossier & Specs Export | none | Reference for the dossier and budget phase |
 | Client AI Consultant & Spatial Advisor | `frontend/consultant.html` | Built (real data only; no credits, sample suggestions or action buttons) |
 | 3D Render Views & Photorealistic Gallery | none | Reference for the renderings phase |

@@ -32,10 +32,21 @@ designer work on the same floor plan. AI assistance comes in later phases.
 - The client and the studio's designers see the same brief, finishes and moodboard; the conversation is
   private to the user who held it.
 
+## Preview only
+
+- Studio branding (`branding.html`): logo and three colours applied to a sample client entry page in the
+  browser. Nothing is saved, nothing reaches real client pages, and the page is not linked from the app.
+
+## Built: 3D walkthrough
+
+- A first-person walkthrough of the plan, opened from the editor, including unsaved drafts. View only.
+- Keyboard (any layout), drag to look, and on-screen buttons. Walls and windows block, doorways let through.
+- Heights are assumed, because the plan stores none ([architecture.md](architecture.md)).
+
 ## Not built yet
 
 Renderings, budget, dossier,
-messaging and tasks, studio branding, invitation emails, per-project team permissions, deployment,
+messaging and tasks, saved and applied studio branding, invitation emails, per-project team permissions, deployment,
 rate limiting, subscriptions and credits.
 
 ## Next

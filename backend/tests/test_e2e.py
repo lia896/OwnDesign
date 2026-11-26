@@ -55,6 +55,7 @@ def servers():
     for process in started:
         if process:
             process.terminate()
+            process.wait(timeout=10)  # or the next module could find the dying server still listening
 
 
 def metric(page, name: str) -> str:
@@ -96,6 +97,24 @@ def test_guest_builds_plan_registers_and_saves(servers, page, api, make_user):
     page.locator("#catalog button[data-type=chair]").press("Enter")
     page.keyboard.press("Enter")
     assert furniture.count() == 2
+
+    # The 3D walkthrough walks the draft: the outer wall stops the walker, and W does not reach the wall tool.
+    page.get_by_role("button", name="3D walkthrough").click()
+    page.locator("#walk canvas[data-position]").wait_for()
+    page.keyboard.down("w")
+    stopped = page.locator("#walk canvas[data-position$=',30']")  # an attribute wait: the page's CSP forbids eval
+    stopped.wait_for()
+    page.wait_for_timeout(500)
+    page.keyboard.up("w")
+    assert stopped.count() == 1
+    # Saving still works here: a guest is asked for an account.
+    page.keyboard.press("Control+s")
+    page.get_by_role("heading", name="Create an account to save your plan").wait_for()
+    page.get_by_role("button", name="Not now").click()
+    page.keyboard.press("Escape")
+    page.locator("#walk").wait_for(state="hidden")
+    assert page.locator("#tool-name").inner_text() == "Select and move"
+    assert (walls.count(), furniture.count()) == (8, 2)
 
     # Scenario 1: a guest cannot persist; saving asks for an account.
     page.locator("#save").click()

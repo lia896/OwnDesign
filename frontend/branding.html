@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self'; object-src 'none'; base-uri 'self'">
+  <title>Studio branding · Atelier</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@500;600&display=swap">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <header class="appbar"><div class="group"><span class="brand">ATELIER</span></div></header>
+  <main class="page branding">
+    <h1>Studio branding</h1>
+    <p class="note">Preview only: nothing is saved or sent anywhere. Reloading the page resets it.</p>
+
+    <div class="branding-layout">
+      <div>
+        <section class="card stack" aria-labelledby="logo-title">
+          <h2 id="logo-title">Logo</h2>
+          <label>Upload logo <input type="file" id="logo-file" accept="image/png,image/jpeg,image/webp"></label>
+          <p class="hint">PNG, JPG or WebP, up to 2 MB.</p>
+          <p class="status error" id="logo-error" role="alert"></p>
+          <div><button type="button" id="logo-remove" disabled>Remove logo</button></div>
+        </section>
+
+        <section class="card stack" aria-labelledby="colors-title">
+          <h2 id="colors-title">Colours</h2>
+          <div class="preset-grid" id="presets"></div>
+          <div class="color-fields" id="colors"></div>
+          <p class="status" id="contrast" role="status"></p>
+          <div><button type="button" id="reset">Reset to default</button></div>
+        </section>
+      </div>
+
+      <section class="theme-preview" id="theme-preview" aria-labelledby="preview-title">
+        <h2 class="sr-only" id="preview-title">Live preview of the client entry page</h2>
+        <div class="preview-bar">
+          <span class="brand">ATELIER</span>
+          <img id="preview-logo" alt="Studio logo" hidden>
+          <span class="chip accent" id="preview-name">Your Studio</span>
+        </div>
+        <div class="preview-body">
+          <div class="hero-card">
+            <span class="label accent">Welcome</span>
+            <h1>Design your home with Your Studio</h1>
+            <p class="muted">Sketch your floor plan, arrange rooms and furniture, and share it with your designer.</p>
+            <div><button type="button" class="primary">Start designing</button></div>
+          </div>
+          <article class="card">
+            <h2>Use a client account</h2>
+            <p class="muted">Keep your plan and work on it together with your designer.</p>
+            <a href="#theme-preview">I already have an account</a>
+          </article>
+        </div>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="js/pages/branding.js"></script>
+</body>
+</html>

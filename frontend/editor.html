@@ -60,8 +60,10 @@
         <span class="chip ok" id="context-role"></span>
       </div>
       <div class="group">
-        <span class="chip"><span class="icon" aria-hidden="true" style="font-size: 14px">grid_4x4</span>Grid: 0.1m snap</span>
-        <span class="chip"><span class="icon" aria-hidden="true" style="font-size: 14px">straighten</span>Auto-dim: on</span>
+        <span class="chip wide"><span class="icon" aria-hidden="true" style="font-size: 14px">grid_4x4</span>Grid: 0.1m snap</span>
+        <span class="chip wide"><span class="icon" aria-hidden="true" style="font-size: 14px">straighten</span>Auto-dim: on</span>
+        <button type="button" id="walk-open"><span class="icon" aria-hidden="true">directions_walk</span>3D walkthrough</button>
+        <button type="button" id="compare-open" hidden><span class="icon" aria-hidden="true">compare</span>Compare versions</button>
       </div>
     </div>
 
@@ -92,7 +94,76 @@
       </div>
 
       <aside class="inspector" id="inspector" aria-label="Element inspector"></aside>
+
+      <section class="walk" id="walk" hidden aria-label="3D walkthrough">
+        <p class="floating" id="walk-hint">Drag to look around. Walk with W A S D or the arrows. Esc returns to the plan.<br>Conceptual view with assumed heights.</p>
+        <button type="button" class="floating" id="walk-close">Back to 2D plan</button>
+        <div class="floating" id="walk-pad" role="group" aria-label="Walking controls">
+          <button type="button" data-move="turnLeft" aria-label="Turn left"><span class="icon" aria-hidden="true">rotate_left</span></button>
+          <button type="button" data-move="forward" aria-label="Walk forward"><span class="icon" aria-hidden="true">arrow_upward</span></button>
+          <button type="button" data-move="turnRight" aria-label="Turn right"><span class="icon" aria-hidden="true">rotate_right</span></button>
+          <button type="button" data-move="left" aria-label="Step left"><span class="icon" aria-hidden="true">arrow_back</span></button>
+          <button type="button" data-move="back" aria-label="Walk back"><span class="icon" aria-hidden="true">arrow_downward</span></button>
+          <button type="button" data-move="right" aria-label="Step right"><span class="icon" aria-hidden="true">arrow_forward</span></button>
+        </div>
+      </section>
     </div>
+
+    <section class="compare" id="compare" hidden aria-labelledby="cmp-title">
+      <div class="compare-bar">
+        <h2 id="cmp-title">Version comparison</h2>
+        <label>Version A · baseline <select id="cmp-a"></select></label>
+        <button type="button" id="cmp-swap" aria-label="Swap versions A and B" title="Swap versions"><span class="icon" aria-hidden="true">swap_horiz</span></button>
+        <label>Version B · compared <select id="cmp-b"></select></label>
+        <div class="cmp-modes" role="group" aria-label="Comparison view">
+          <button type="button" data-mode="side" aria-pressed="true">Side by side</button>
+          <button type="button" data-mode="diff" aria-pressed="false">Difference view</button>
+        </div>
+        <button type="button" class="primary" id="cmp-exit"><span class="icon" aria-hidden="true">close</span>Exit comparison</button>
+      </div>
+      <p class="small muted cmp-dirty" id="cmp-dirty" hidden>Your unsaved edits are not part of this comparison. They stay in the editor.</p>
+      <p class="status" id="cmp-status" role="status"></p>
+      <p class="status error" id="cmp-error" role="alert"></p>
+      <div class="compare-body">
+        <div class="compare-plans" id="cmp-plans" hidden>
+          <figure class="cmp-plan" id="cmp-plan-a">
+            <figcaption class="code" id="cmp-caption-a"></figcaption>
+            <svg id="cmp-svg-a" role="img" aria-label="Version A floor plan" preserveAspectRatio="xMidYMid meet"></svg>
+          </figure>
+          <figure class="cmp-plan" id="cmp-plan-b">
+            <figcaption class="code" id="cmp-caption-b"></figcaption>
+            <svg id="cmp-svg-b" role="img" aria-label="Version B floor plan" preserveAspectRatio="xMidYMid meet"></svg>
+          </figure>
+          <div class="floating cmp-zoom">
+            <button type="button" id="cmp-zoom-in" aria-label="Zoom in"><span class="icon" aria-hidden="true">add</span></button>
+            <button type="button" id="cmp-zoom-out" aria-label="Zoom out"><span class="icon" aria-hidden="true">remove</span></button>
+            <button type="button" id="cmp-zoom-fit" aria-label="Fit both plans"><span class="icon" aria-hidden="true">fit_screen</span></button>
+          </div>
+        </div>
+        <aside class="compare-panel" id="cmp-result" hidden aria-label="Changes">
+          <div>
+            <span class="label">Changes</span>
+            <p class="cmp-total" id="cmp-total"></p>
+            <div class="cmp-summary" id="cmp-summary"></div>
+          </div>
+          <div class="row" id="cmp-filters">
+            <label class="grow">Type <select id="cmp-kind"></select></label>
+            <label class="grow">Room <select id="cmp-room"></select></label>
+          </div>
+          <ol class="cmp-list" id="cmp-list" aria-label="Changes by room"></ol>
+          <p class="small muted" id="cmp-none" hidden>No changes match these filters.</p>
+          <div class="cmp-details" id="cmp-details" hidden aria-live="polite"></div>
+          <div class="stack cmp-continue">
+            <span class="label">Continue working</span>
+            <p class="small muted">Loads the version into the editor. Saving it then adds a new version; nothing is overwritten.</p>
+            <div class="row">
+              <button type="button" id="cmp-continue-a">From version A</button>
+              <button type="button" id="cmp-continue-b">From version B</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
   </main>
 
   <footer class="statusbar">

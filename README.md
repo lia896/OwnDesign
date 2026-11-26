@@ -49,6 +49,9 @@ Integration and E2E tests run against the project in `backend/.env`, create thro
 (`*@owndesign-test.example.com`) and delete them afterwards. They are skipped when `.env` is missing.
 First E2E run needs `uv run playwright install chromium`.
 
+GitHub Actions runs both suites on every push to `dev` and `main`; a pull request runs the frontend tests and
+the backend tests that need no secrets (`.github/workflows/ci.yml`, `wiki/testing.md`).
+
 ## Database and auth settings
 
 ```sh
