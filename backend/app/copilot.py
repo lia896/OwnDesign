@@ -76,7 +76,8 @@ def room_rect(geometry: Geometry, room_id: str) -> Box | None:
     xs = [v for wall in walls for v in (wall.x1, wall.x2)]
     ys = [v for wall in walls for v in (wall.y1, wall.y2)]
     inset = max(wall.thickness for wall in walls) / 2
-    return min(xs) + inset, min(ys) + inset, max(xs) - inset, max(ys) - inset
+    box = min(xs) + inset, min(ys) + inset, max(xs) - inset, max(ys) - inset
+    return box if box[2] > box[0] and box[3] > box[1] else None  # walls on one line enclose nothing
 
 
 def footprint(item) -> Box:

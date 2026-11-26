@@ -6,7 +6,7 @@ import json
 import pytest
 from pydantic import ValidationError
 
-from app.copilot import Action, Scope, apply_actions, build_context, footprint, new_problems, parse_reply, problems
+from app.copilot import Action, Scope, apply_actions, build_context, footprint, new_problems, parse_reply, problems, room_rect
 from app.schemas import Geometry
 
 # A 500 x 400 cm living room (walls 10 cm thick) with a door on the top wall at x 50..140.
@@ -139,6 +139,11 @@ def test_only_new_problems_count_against_a_change():
     moved = apply_actions(crowded, [move("sofa", 260, 320)])
     assert new_problems(crowded, moved) == []
     assert new_problems(plan(), crowded) != []
+
+
+def test_room_whose_walls_enclose_nothing_has_no_bounds():
+    flat = plan(lambda p: p.update(walls=p["walls"][:1], openings=[]))
+    assert room_rect(flat, "r1") is None and problems(flat) == []
 
 
 def test_plan_without_walls_skips_room_checks():
