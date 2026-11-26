@@ -62,6 +62,7 @@
       <div class="group">
         <span class="chip"><span class="icon" aria-hidden="true" style="font-size: 14px">grid_4x4</span>Grid: 0.1m snap</span>
         <span class="chip"><span class="icon" aria-hidden="true" style="font-size: 14px">straighten</span>Auto-dim: on</span>
+        <button type="button" id="copilot-toggle" aria-controls="copilot" aria-expanded="false" hidden><span class="icon" aria-hidden="true">auto_awesome</span>AI Copilot</button>
       </div>
     </div>
 
@@ -83,6 +84,10 @@
           <button type="button" id="duplicate"><span class="icon" aria-hidden="true">content_copy</span>Duplicate</button>
           <button type="button" id="delete" aria-label="Delete selection"><span class="icon" aria-hidden="true">delete</span></button>
         </div>
+        <div class="floating" id="ai-preview" hidden role="status">
+          <span class="icon" aria-hidden="true">visibility</span><span>Previewing: <strong id="ai-preview-title"></strong></span>
+          <button type="button" id="ai-preview-end">End preview</button>
+        </div>
         <div class="floating" id="zoom">
           <button type="button" id="zoom-in" aria-label="Zoom in"><span class="icon" aria-hidden="true">add</span></button>
           <span class="code" id="zoom-level"></span>
@@ -92,6 +97,43 @@
       </div>
 
       <aside class="inspector" id="inspector" aria-label="Element inspector"></aside>
+
+      <aside class="copilot" id="copilot" hidden aria-labelledby="copilot-title">
+        <div class="copilot-head">
+          <div>
+            <span class="label accent">AI Design Copilot</span>
+            <h2 id="copilot-title">Plan review</h2>
+          </div>
+          <button type="button" id="copilot-close" aria-label="Close the copilot"><span class="icon" aria-hidden="true">close</span></button>
+        </div>
+        <label>Context
+          <select id="copilot-scope">
+            <option value="project">Entire project</option>
+            <option value="room">Selected room</option>
+            <option value="object">Selected item</option>
+          </select>
+        </label>
+        <p class="copilot-context code" id="copilot-context"></p>
+        <div class="copilot-body">
+          <div id="copilot-empty" class="copilot-empty">
+            <strong>How can I help with this plan?</strong>
+            <span class="label">Quick prompts</span>
+            <div class="quick" id="copilot-quick"></div>
+          </div>
+          <ol class="copilot-thread" id="copilot-thread" aria-label="Copilot conversation"></ol>
+        </div>
+        <form id="copilot-form" class="copilot-form">
+          <label for="copilot-message" class="sr-only">Ask the copilot</label>
+          <textarea id="copilot-message" rows="3" maxlength="2000" placeholder="Ask about the layout, or describe what you need"></textarea>
+          <div class="row between">
+            <span class="code" id="copilot-counter"></span>
+            <button class="primary" id="copilot-send" type="submit"><span class="icon" aria-hidden="true">send</span>Ask</button>
+          </div>
+          <p class="small muted" id="copilot-status" role="status"></p>
+          <p class="small status error" id="copilot-error" role="alert"></p>
+          <p class="small muted" id="copilot-note">Suggestions are checked against the walls, doors and other furniture. Applying one saves a new version.</p>
+        </form>
+      </aside>
     </div>
   </main>
 

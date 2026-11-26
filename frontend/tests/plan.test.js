@@ -144,3 +144,26 @@ test("a room disappears with its last wall, and a zero move changes nothing", ()
   assert.equal(P.remove(start, "walls", start.walls[0].id).rooms.length, 2, "a room with walls left stays");
   assert.equal(P.translate(start, "rooms", room.id, 0, 0), start);
 });
+
+test("copilot actions move, rotate, resize and remove furniture without mutating the plan", () => {
+  const plan = deepFreeze({ ...P.emptyPlan(), furniture: [{ id: "a", type: "sofa", x: 0, y: 0, w: 200, d: 90, rotation: 0 }, { id: "b", type: "chair", x: 5, y: 5, w: 50, d: 50, rotation: 0 }] });
+  const next = P.applyActions(plan, [
+    { type: "move_object", object_id: "a", x: 120, y: 80 },
+    { type: "rotate_object", object_id: "a", rotation: -90 },
+    { type: "resize_object", object_id: "a", w: 180, d: 85 },
+    { type: "remove_object", object_id: "b" },
+  ]);
+  assert.deepEqual(next.furniture, [{ id: "a", type: "sofa", x: 120, y: 80, w: 180, d: 85, rotation: 270 }]);
+  assert.equal(plan.furniture.length, 2);
+});
+
+test("copilot actions skip unknown items, unknown types and invalid sizes", () => {
+  const plan = deepFreeze({ ...P.emptyPlan(), furniture: [{ id: "a", type: "sofa", x: 0, y: 0, w: 200, d: 90, rotation: 0 }] });
+  const next = P.applyActions(plan, [
+    { type: "move_object", object_id: "ghost", x: 1, y: 1 },
+    { type: "delete_wall", object_id: "a" },
+    { type: "resize_object", object_id: "a", w: 0, d: Number.NaN },
+  ]);
+  assert.deepEqual(next.furniture, plan.furniture);
+  assert.deepEqual(P.applyActions(plan, []), plan);
+});
