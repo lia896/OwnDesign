@@ -117,3 +117,8 @@ tests for the copilot written but not run. Pages: [testing](testing.md).
 No high-confidence findings: apply is designer-only and re-checked on the server, conversations stay per user,
 `reserve_ai_message` is service-role only, model text reaches the page as text only. Pages: [security](security.md).
 
+## [2026-11-26] decision | Copilot apply open to every user of the project
+The user: the app is only for customers, not internal designers. The designer-only check on
+`POST .../copilot/apply` is removed; tests now expect a client to apply. Pages: [decisions](decisions.md),
+[architecture](architecture.md), [security](security.md).
+

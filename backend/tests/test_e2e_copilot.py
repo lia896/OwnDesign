@@ -101,13 +101,12 @@ def test_selection_sets_the_scope(page, world):
     assert posts[-1]["scope"] == {"kind": "object", "id": "f1"} and posts[-1]["message"] == "Is this sofa too big?"
 
 
-def test_client_can_preview_but_not_apply(page, world):
+def test_client_can_apply_too(page, world):
     answer_in_browser(page, [])
     open_copilot(page, world.client, world.pid)
-    assert "Only the studio's designers can apply" in page.locator("#copilot-note").inner_text()
     page.get_by_role("button", name="Suggest improvements").click()
     page.get_by_role("heading", name=TITLE).wait_for()
-    assert page.locator(".rec button", has_text="Apply").count() == 0
+    assert page.locator(".rec button", has_text="Apply").count() == 1  # only the checked suggestion
     assert page.get_by_role("button", name="Preview").count() == 2
 
 

@@ -308,7 +308,6 @@ function setupCopilot() {
   const toggle = $("#copilot-toggle");
   copilot = mountCopilot(panel, {
     projectId: state.project.id,
-    canApply: state.project.my_role === "designer",
     plan: () => state.history.present,
     selection: () => state.selection,
     baseVersionNo: () => state.versions[0]?.version_no ?? null,

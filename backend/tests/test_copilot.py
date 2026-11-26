@@ -161,8 +161,9 @@ def test_stale_base_version_is_409(api, world):
     assert api.post(url(world, "apply"), json=body, headers=world.designer.headers).status_code == 409
 
 
-def test_client_cannot_apply(api, world):
-    assert api.post(url(world, "apply"), json=apply_body(api, world), headers=world.client.headers).status_code == 403
+def test_client_applies_too(api, world):
+    response = api.post(url(world, "apply"), json=apply_body(api, world), headers=world.client.headers)
+    assert response.status_code == 201 and response.json()["data"]["author_role"] == "client"
 
 
 def test_outsider_cannot_apply(api, world):

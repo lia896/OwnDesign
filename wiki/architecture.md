@@ -95,7 +95,7 @@ The AI panel beside the plan editor (`backend/app/routes/copilot.py`, engine `ba
   `applicable` when it names existing items and adds no new problem: furniture past a room's walls or outside
   every room, overlapping furniture, or an item in a door's swing (a square as deep as the door is wide, on
   both sides of the wall). Problems the plan already had are not blamed on the change.
-- **Apply:** studio designers only (403 for clients). The server re-applies and re-checks the actions, then
+- **Apply:** anyone with write access to the project. The server re-applies and re-checks the actions, then
   saves a new version through `save_version` in `projects.py`. `base_version_no` must still be the newest
   version, otherwise 409, so a suggestion never lands on top of a newer save.
 - **Limits:** shares the consultant's daily cap of 30 questions per user. Room bounds are the box of the room's

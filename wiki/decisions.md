@@ -13,7 +13,8 @@ Each line: the decision, who made it, why. Dates are in [log.md](log.md).
 - **Stitch screens for later phases stay as references** in `design/stitch/`; the two that match Phase 1 (client portal, studio dashboard) are built with real data only.
 - **Design copilot beside the plan, consultant page kept.** The copilot is a panel docked in the editor;
   the separate consultant page stays as it is (2026-11-26).
-- **Only studio designers apply copilot changes.** Clients can ask and preview (2026-11-26).
+- **The app is for customers, not internal designers** (2026-11-26), so anyone with access to the project can
+  apply copilot changes. This replaced the earlier designer-only rule the same day.
 - **Working rules** in `CLAUDE.md`: plan first, Fable 5.2, three kinds of tests, security review at every stage, commit per finished piece of code, subagents for specialist work, memory in `wiki/`.
 
 ## By Claude (open to change)

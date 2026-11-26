@@ -49,8 +49,8 @@ commits is still to do.
 
 ## Design copilot (2026-11-26)
 
-Reviewed on branch `feature/ai-consultant`, no high-confidence findings. Applying a change is designer-only and
-the server re-applies and re-checks it; a stale base version is refused. The model may only name furniture
+Reviewed on branch `feature/ai-consultant`, no high-confidence findings. Applying a change is open to anyone with
+access to the project (the same people who can already save a version); the server re-applies and re-checks it; a stale base version is refused. The model may only name furniture
 actions from a fixed list. Copilot turns live in the user's own conversation (same RLS as the consultant).
 `reserve_ai_message` was recreated with `search_path = ''` and is executable by `service_role` only. Model text
 is put on the page with `textContent` only.

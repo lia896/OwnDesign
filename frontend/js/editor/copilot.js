@@ -1,6 +1,6 @@
 // The design copilot: an AI panel docked beside the plan. It sends the plan as it is in the editor (unsaved edits
 // included) with a scope (whole project, one room, one item), and shows the structured reply: observations and
-// recommendation cards. A card's changes can be previewed on the canvas; a studio designer can apply them, which
+// recommendation cards. A card's changes can be previewed on the canvas and applied, which
 // the server checks again and saves as a new version. All model text is set with textContent only.
 import { api } from "../api.js";
 import { describeAction, itemName, roomOf, scopeTargets } from "../copilot-logic.js";
@@ -12,7 +12,7 @@ const cm = (value) => `${Math.round(value)} cm`;
 const QUICK = ["Analyse the current layout", "Suggest improvements", "Check circulation and door clearances", "Suggest alternative arrangements"];
 const SCOPE_LABEL = { project: "Entire project", room: "Room", object: "Item" };
 
-// host: { projectId, canApply, plan(), selection(), baseVersionNo(), isDirty(), preview(plan, ids, title), endPreview(), applied(version) }
+// host: { projectId, plan(), selection(), baseVersionNo(), isDirty(), preview(plan, ids, title), endPreview(), applied(version) }
 export function mountCopilot(root, host) {
   const base = `/v1/projects/${encodeURIComponent(host.projectId)}/copilot`;
   const dismissedKey = `copilot-dismissed:${host.projectId}`;
@@ -88,7 +88,7 @@ export function mountCopilot(root, host) {
       });
       buttons.push(preview);
     }
-    if (host.canApply && rec.applicable) {
+    if (rec.applicable) {
       const apply = h("button", { type: "button", class: "primary" }, h("span", { class: "icon", "aria-hidden": "true" }, "check"), "Apply");
       apply.addEventListener("click", async () => {
         apply.disabled = true;
@@ -224,7 +224,6 @@ export function mountCopilot(root, host) {
     send();
   });
   scopeSelect.addEventListener("change", refresh);
-  if (!host.canApply) $("#copilot-note", root).textContent = "Suggestions can be previewed here. Only the studio's designers can apply them.";
 
   return {
     refresh,
