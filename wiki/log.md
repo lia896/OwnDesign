@@ -101,3 +101,19 @@ Several findings fixed (suspended studios, upload race, consultant cap and conte
 ## [2026-11-23] test | Phase 2 verified
 Backend 94 passed, frontend 31 passed. Pages: [testing](testing.md).
 
+## [2026-11-26] plan | Design copilot
+Gap analysis of the consultant against the copilot spec; plan approved by the user with two decisions: keep the
+consultant page and dock the copilot beside the plan; only designers apply. Pages: [decisions](decisions.md).
+
+## [2026-11-26] build | Design copilot
+Engine, API, migration and editor panel on branch `feature/ai-consultant`. Commits `6b743a6`, `476b333`,
+`223e7fa`, `8ed2b14`. Pages: [architecture](architecture.md), [decisions](decisions.md), [open-items](open-items.md).
+
+## [2026-11-26] test | Design copilot
+Backend 59 passed, 67 skipped (no Supabase keys on this machine), frontend 36 passed. Integration and browser
+tests for the copilot written but not run. Pages: [testing](testing.md).
+
+## [2026-11-26] security | Review of the design copilot
+No high-confidence findings: apply is designer-only and re-checked on the server, conversations stay per user,
+`reserve_ai_message` is service-role only, model text reaches the page as text only. Pages: [security](security.md).
+

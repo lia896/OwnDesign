@@ -34,7 +34,16 @@ reload; designer sees the client's data; client-side rejections, markup stays te
 visitor; consultant page limits) passes together with `test_e2e.py` (9 browser tests in all). No chat message
 reaches OpenAI in the suite; the real call was checked by hand once.
 
+2026-11-26 (design copilot, on a machine without `backend/.env`): backend 59 passed, 67 skipped (need Supabase),
+frontend 36 passed. New: `backend/tests/test_copilot_engine.py` (37 pure tests: actions, geometry checks,
+context, reply parsing), `test_copilot.py` (API: designer-only apply, stale base 409, bad changes 422, shared cap,
+isolation, suspended studio), `test_e2e_copilot.py` (4 browser journeys), `frontend/tests/copilot.test.js`.
+`test_copilot.py` and `test_e2e_copilot.py` have **not run yet**: they need the Supabase keys.
+
 ## Local setup notes
+
+On an Intel Mac, the locked `cryptography` has no prebuilt wheel and fails to build; a side environment
+with `cryptography --only-binary` (48.x) runs the suite without changing `uv.lock`.
 
 `backend/.env` needs `ALLOWED_ORIGINS` to include both `http://localhost:5500` and `http://127.0.0.1:5500` (the
 journeys use the second). A system-level `OPENAI_API_KEY` overrides the one in `.env`; unset it before starting the backend.

@@ -19,6 +19,16 @@ Remove an item when it is resolved and note the resolution in [log.md](log.md).
 - **Studio dashboard** does not link project cards to the brief, finishes or moodboard; designers reach them through the editor.
 - The editor has no link to the Phase 2 pages at 767 px and below.
 
+## Design copilot gaps
+
+- **Room shapes.** Bounds are the box of a room's walls; an L-shaped room is checked against its bounding box.
+- **Windows** are not checked for obstruction; only doors are.
+- **Door swing** is checked on both sides of the wall, because the plan does not record which way a door opens.
+- **Dismissed cards** are remembered in this browser only.
+- **Not checked in a real browser yet.** The browser journeys in `backend/tests/test_e2e_copilot.py` need the
+  Supabase keys; they were written on a machine without them and have not run.
+- **Retention and consent** of copilot turns follow the consultant's open item above.
+
 ## Later phases with a Stitch screen waiting
 
 Studio branding, project dossier and export, 3D renderings: designs are in
