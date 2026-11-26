@@ -31,6 +31,9 @@ Phase 2 (`supabase/migrations/20261123*`): `project_briefs` (one JSON document p
 `finish_selections` (unique per room and surface), `inspiration_assets`, `moodboard_items`,
 `ai_conversations` (unique per project and user), `ai_messages`, `storage_deletions` (queue of files to remove).
 Their SELECT policies go through `projects`, except conversations: only their own user reads them.
+`ai_messages.kind` (`chat` or `copilot`) keeps the consultant page and the editor's copilot apart in one
+conversation; `payload` holds a copilot turn's scope or its checked reply
+(`supabase/migrations/20261126100000_copilot_messages.sql`).
 
 ## Plan geometry
 
@@ -48,7 +51,9 @@ One JSON document per version, validated in `backend/app/schemas.py` and edited 
 ## Editor
 
 `frontend/js/editor/`: `main.js` (state, tools, keyboard, save), `render.js` (SVG), `pointer.js`
-(drag, draw, pan, pinch, wheel), `panel.js` (inspector and versions). The whole canvas is redrawn on
+(drag, draw, pan, pinch, wheel), `panel.js` (inspector and versions), `copilot.js` (the AI copilot panel, pure
+helpers in `frontend/js/copilot-logic.js`). A copilot preview is drawn instead of the plan without entering
+the undo history; the canvas ignores pointer and keys (except Escape) while it shows, and any edit ends it. The whole canvas is redrawn on
 each change; the plan object is never mutated.
 
 ## API
@@ -59,7 +64,8 @@ Quotas: 20 projects per client per studio, 500 versions per project.
 
 Design assistance (`backend/app/routes/design.py`, `consultant.py`, catalog in `backend/app/catalog.py`):
 `GET /v1/catalog`; under `/v1/projects/{id}`: `brief`, `finishes`, `assets`, `moodboard`
-(GET and PUT, assets POST and DELETE), `consultant/messages` (GET, POST). Every write goes through
+(GET and PUT, assets POST and DELETE), `consultant/messages` (GET, POST), `copilot/messages` (GET, POST),
+`copilot/apply` (POST). Every write goes through
 `_writable_project`, which refuses a suspended studio.
 
 - **Images:** private bucket `project-assets`, no storage policies. The backend checks the file's bytes
@@ -75,3 +81,23 @@ Design assistance (`backend/app/routes/design.py`, `consultant.py`, catalog in `
   the endpoint answers 503.
 - **Frontend:** `design.html` (brief, materials, moodboard tabs), `consultant.html`; pure logic in
   `frontend/js/design-logic.js`.
+
+## Design copilot
+
+The AI panel beside the plan editor (`backend/app/routes/copilot.py`, engine `backend/app/copilot.py`).
+
+- **Ask:** the editor sends the plan as it is on screen (unsaved edits included, validated as `Geometry`) and a
+  scope: project, room or item. The model gets rooms with inner bounds, openings, furniture with size, position
+  and rotation, the measured `detected_problems`, and the brief, inside an escaped `<plan_context>` tag.
+- **Reply:** OpenAI structured output (`REPLY_SCHEMA`, strict). `parse_reply` clips it and checks every proposed
+  change. Unusable output is a 502 and is not stored.
+- **Actions:** only `move_object`, `rotate_object`, `resize_object`, `remove_object` on furniture. A change is
+  `applicable` when it names existing items and adds no new problem: furniture past a room's walls or outside
+  every room, overlapping furniture, or an item in a door's swing (a square as deep as the door is wide, on
+  both sides of the wall). Problems the plan already had are not blamed on the change.
+- **Apply:** anyone with write access to the project. The server re-applies and re-checks the actions, then
+  saves a new version through `save_version` in `projects.py`. `base_version_no` must still be the newest
+  version, otherwise 409, so a suggestion never lands on top of a newer save.
+- **Limits:** shares the consultant's daily cap of 30 questions per user. Room bounds are the box of the room's
+  walls, so an L-shaped room is checked against its bounding box.
+

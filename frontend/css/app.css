@@ -255,6 +255,52 @@ body.app .appbar { grid-column: 1 / -1; }
 #canvas .handle { fill: #fff; stroke: var(--primary-bright); cursor: crosshair; }
 #canvas .preview { stroke: var(--primary-bright); stroke-dasharray: 14 10; }
 
+/* Design copilot: AI panel docked beside the plan (js/editor/copilot.js) */
+#copilot-toggle { min-height: 28px; padding: 0 10px; font-size: 12px; }
+#copilot-toggle[aria-expanded="true"] { background: var(--inverse); border-color: var(--inverse); color: var(--on-inverse); }
+.copilot { width: 380px; flex: none; display: flex; flex-direction: column; gap: 10px; padding: 16px; background: var(--panel); box-shadow: var(--shadow-2); z-index: 3; min-height: 0; }
+.copilot-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.copilot-head h2 { font-size: 20px; line-height: 28px; }
+.copilot-head button { width: 32px; min-height: 32px; padding: 0; border: 0; }
+.copilot-context { margin: 0; padding: 6px 8px; border-radius: 4px; background: var(--surface-low); color: var(--ink-soft); overflow-wrap: anywhere; }
+.copilot-body { flex: 1; min-height: 0; overflow-y: auto; display: grid; align-content: start; gap: 12px; }
+.copilot-empty { display: grid; gap: 8px; }
+.copilot-empty strong { font: 500 16px/24px var(--font-head); }
+.quick { display: grid; gap: 6px; }
+.quick button { justify-content: flex-start; font-weight: 500; white-space: normal; text-align: left; }
+.copilot-thread { display: grid; gap: 12px; list-style: none; margin: 0; padding: 0; }
+.copilot-thread:empty { display: none; }
+.turn { display: grid; gap: 8px; }
+.turn.user { justify-self: end; max-width: 92%; padding: 8px 12px; border-radius: 8px; background: var(--surface-high); }
+.turn .msg-text { font-size: 14px; line-height: 21px; }
+.obs-list { display: grid; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.obs { display: grid; gap: 2px; justify-items: start; padding: 8px 10px; border-radius: 6px; background: var(--surface-low); }
+.obs.issue { border-left: 3px solid var(--primary-bright); }
+.obs p { margin: 0; color: var(--ink-soft); font-size: 13px; line-height: 19px; }
+.rec { display: grid; gap: 6px; padding: 12px; border: 1px solid var(--hairline); border-radius: 8px; box-shadow: var(--shadow-1); }
+.rec.blocked { background: var(--surface-low); box-shadow: none; }
+.rec h3 { font-size: 15px; line-height: 22px; font-weight: 600; overflow-wrap: anywhere; }
+.rec p { margin: 0; font-size: 13px; line-height: 19px; overflow-wrap: anywhere; }
+.rec-actions, .rec-problems { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
+.rec-problems { color: var(--error); font-size: 12px; line-height: 18px; }
+.rec-buttons { display: flex; flex-wrap: wrap; gap: 4px; }
+.rec-buttons button { min-height: 30px; padding: 0 10px; font-size: 12px; }
+.rec-buttons button[aria-pressed="true"] { background: var(--inverse); border-color: var(--inverse); color: var(--on-inverse); }
+.copilot-form { display: grid; gap: 6px; }
+.copilot-form textarea { min-height: 64px; }
+.copilot-form p { margin: 0; }
+#ai-preview { left: 50%; top: 12px; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; padding: 4px 4px 4px 12px; font-size: 13px; }
+#ai-preview button { min-height: 30px; }
+#canvas.previewing { pointer-events: none; }
+#canvas .item.changed rect { fill: var(--secondary-tint); stroke: var(--secondary); stroke-width: 3; }
+#canvas .ghost { fill: none; stroke: var(--outline); stroke-width: 2; stroke-dasharray: 6 6; vector-effect: non-scaling-stroke; }
+@media (max-width: 1439px) {
+  .editor.with-copilot .inspector { display: none; }
+}
+@media (max-width: 767px) {
+  .copilot { order: 2; width: 100%; max-height: 55vh; }
+}
+
 @media (max-width: 1199px) {
   body.app { grid-template-columns: minmax(0, 1fr); }
   .appbar .chip.caution .wide { display: none; }

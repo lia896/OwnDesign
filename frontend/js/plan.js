@@ -192,3 +192,16 @@ export const history = {
   redo: (h) =>
     h.future.length === 0 ? h : { past: [...h.past, h.present], present: h.future[0], future: h.future.slice(1) },
 };
+
+// Copilot changes (the action list in backend/app/copilot.py), used to preview a suggestion on the canvas.
+// Unknown action types and items are skipped; the server checks everything again when a change is applied.
+const ACTION_KEYS = { move_object: ["x", "y"], rotate_object: ["rotation"], resize_object: ["w", "d"] };
+
+export function applyActions(plan, actions) {
+  return actions.reduce((next, action) => {
+    if (!next.furniture.some((item) => item.id === action.object_id)) return next;
+    if (action.type === "remove_object") return remove(next, "furniture", action.object_id);
+    const keys = ACTION_KEYS[action.type];
+    return keys ? patch(next, "furniture", action.object_id, Object.fromEntries(keys.map((key) => [key, action[key]]))) : next;
+  }, plan);
+}

@@ -5,6 +5,7 @@ import { FURNITURE, FURNITURE_BY_TYPE } from "../catalog.js";
 import * as P from "../plan.js";
 import { KEYS, load, save as store } from "../store.js";
 import { $, action, h, run, showStudio, toast } from "../ui.js";
+import { mountCopilot } from "./copilot.js";
 import { renderInspector } from "./panel.js";
 import { attachPointer, zoomAt } from "./pointer.js";
 import { draw, visibleArea } from "./render.js";
@@ -37,7 +38,9 @@ const state = {
   draft: null,
   versions: null,
   signedIn: false,
+  aiPreview: null, // { plan, changed, ghosts, title }: a copilot suggestion shown on the canvas, not part of the plan
 };
+let copilot = null;
 
 const editor = {
   get plan() {
@@ -60,6 +63,7 @@ const editor = {
     if (state.live) editor.commit(state.live);
   },
   commit(plan, selection = state.selection) {
+    copilot?.endPreview(); // any edit ends a copilot preview, so the preview can never be edited or saved by mistake
     state.live = null;
     // A click without movement, or re-entering the same value, must not add an undo step or mark the plan unsaved.
     if (JSON.stringify(plan) !== JSON.stringify(state.history.present)) state.history = P.history.push(state.history, plan);
@@ -109,13 +113,18 @@ function render() {
   canvas.setAttribute("viewBox", `${x} ${y} ${w} ${height}`);
   canvas.dataset.tool = state.tool;
   const hadFocus = canvas.contains(document.activeElement);
-  draw(canvas, { plan, selection: state.selection, preview: state.previewLine });
+  const ai = state.aiPreview;
+  canvas.classList.toggle("previewing", Boolean(ai));
+  $("#ai-preview").hidden = !ai;
+  if (ai) $("#ai-preview-title").textContent = ai.title;
+  draw(canvas, ai ? { plan: ai.plan, selection: null, changed: ai.changed, ghosts: ai.ghosts } : { plan, selection: state.selection, preview: state.previewLine });
   if (hadFocus) {
     const node = state.selection && canvas.querySelector(`[data-kind="${state.selection.kind}"][data-id="${state.selection.id}"]`);
     (node ?? canvas).focus({ preventScroll: true });
   }
 
   renderInspector($("#inspector"), editor, { versions: state.versions, onLoadVersion: loadVersion });
+  copilot?.refresh();
 
   for (const button of $("#tools").children) {
     const { tool } = button.dataset;
@@ -208,6 +217,11 @@ function placeAtCentre() {
 function onKey(event) {
   if (event.target.closest("input, select, textarea, dialog")) return;
   if (state.live || state.previewLine) return; // mid-drag: the drag would overwrite a keyboard edit
+  if (state.aiPreview) {
+    // The canvas shows a suggestion, not the plan: only Escape (end the preview) is handled.
+    if (event.key === "Escape") copilot.endPreview();
+    return;
+  }
   const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
   const mod = event.ctrlKey || event.metaKey;
   if (mod && key === "z") event.shiftKey ? redo() : undo();
@@ -287,6 +301,47 @@ async function savePlan(label) {
   state.versions = [version, ...state.versions];
   render();
   toast(`Saved as v${version.version_no}`);
+}
+
+function setupCopilot() {
+  const panel = $("#copilot");
+  const toggle = $("#copilot-toggle");
+  copilot = mountCopilot(panel, {
+    projectId: state.project.id,
+    plan: () => state.history.present,
+    selection: () => state.selection,
+    baseVersionNo: () => state.versions[0]?.version_no ?? null,
+    preview(plan, changed, title) {
+      const before = state.history.present.furniture.filter((item) => changed.has(item.id));
+      state.aiPreview = { plan, changed, ghosts: before, title };
+      render();
+    },
+    endPreview() {
+      state.aiPreview = null;
+      render();
+    },
+    applied(version) {
+      const hadEdits = isDirty();
+      editor.commit(version.geometry);
+      state.saved = state.history.present;
+      state.versions = [version, ...state.versions];
+      render();
+      toast(`Applied and saved as v${version.version_no}${hadEdits ? ", with your unsaved edits" : ""}. Undo returns to the previous plan.`);
+    },
+  });
+  const show = (open) => {
+    toggle.setAttribute("aria-expanded", String(open));
+    $(".editor").classList.toggle("with-copilot", open);
+    open ? copilot.open() : copilot.close();
+    requestAnimationFrame(render); // the canvas changed width
+  };
+  toggle.hidden = false;
+  toggle.addEventListener("click", () => show(toggle.getAttribute("aria-expanded") !== "true"));
+  $("#copilot-close").addEventListener("click", () => {
+    show(false);
+    toggle.focus();
+  });
+  $("#ai-preview-end").addEventListener("click", () => copilot.endPreview());
 }
 
 function buildChrome(name, role) {
@@ -387,6 +442,7 @@ run(async () => {
   state.history = P.history.start(plan);
   state.saved = plan;
   buildChrome(name, role);
+  if (state.project) setupCopilot();
   fit();
   if (params.get("save") && state.draft && state.signedIn) openSave();
 });

@@ -105,11 +105,11 @@ function openingNode(opening, wall, selected) {
   return svg("g", focusable("openings", opening.id, label, selected ? "selected" : ""), along("gap", t + 4), symbol, along("hit", Math.max(t, 36)));
 }
 
-function furnitureNode(item, selected) {
+function furnitureNode(item, selected, changed) {
   const spec = FURNITURE_BY_TYPE.get(item.type);
   const label = spec?.label ?? item.type;
   const font = Math.min(Math.max(Math.min(item.w, item.d) * 0.16, 9), 15);
-  const cls = ["item", spec?.review && "review", selected && "selected"].filter(Boolean).join(" ");
+  const cls = ["item", spec?.review && "review", selected && "selected", changed && "changed"].filter(Boolean).join(" ");
   return svg("g", { ...focusable("furniture", item.id, `${label}, ${Math.round(item.w)} by ${Math.round(item.d)} cm`, cls), transform: `translate(${item.x} ${item.y}) rotate(${item.rotation})` },
     svg("rect", { x: -item.w / 2, y: -item.d / 2, width: item.w, height: item.d, rx: 4 }),
     svg("text", { y: font * 0.35, "text-anchor": "middle", "font-size": font }, label),
@@ -166,14 +166,19 @@ function selectionOverlay(plan, selection, scale) {
   return [];
 }
 
-export function draw(canvas, { plan, selection, preview }) {
+// Where an item stood before a previewed copilot change: a dashed outline under the new plan.
+const ghostNode = (item) =>
+  svg("rect", { x: -item.w / 2, y: -item.d / 2, width: item.w, height: item.d, rx: 4, class: "ghost", transform: `translate(${item.x} ${item.y}) rotate(${item.rotation})`, "pointer-events": "none" });
+
+export function draw(canvas, { plan, selection, preview, changed = new Set(), ghosts = [] }) {
   const area = visibleArea(canvas);
   const walls = new Map(plan.walls.map((wall) => [wall.id, wall]));
   const is = (kind, id) => selection?.kind === kind && selection.id === id;
   canvas.replaceChildren(
     ...[
       grid(area),
-      plan.furniture.map((item) => furnitureNode(item, is("furniture", item.id))),
+      ghosts.map(ghostNode),
+      plan.furniture.map((item) => furnitureNode(item, is("furniture", item.id), changed.has(item.id))),
       plan.walls.map((wall) => wallNode(wall, is("walls", wall.id))),
       plan.openings.map((opening) => openingNode(opening, walls.get(opening.wallId), is("openings", opening.id))),
       dimensions(plan, area.scale),
